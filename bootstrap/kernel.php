@@ -4,7 +4,7 @@
  * This script return the way that the DI container will resolve the dependencies
  */
 
-use App\Controllers\ReportController;
+use App\Controllers\UploadController;
 use App\Services\Upload\UploadFile;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
@@ -18,12 +18,11 @@ return [
         return new Environment($loader);
     },
 
-    // config controller
-    ReportController::class => function () {
-        return new ReportController(
+    // DI for UploadController
+    UploadController::class => function () {
+        return new UploadController(
             new UploadFile(ServerRequest::fromGlobals()),
             new Response()
         );
     },
-
 ];

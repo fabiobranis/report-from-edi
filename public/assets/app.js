@@ -7,21 +7,15 @@ document.querySelector('#uploadButton').addEventListener('click', function () {
 
     let request = new XMLHttpRequest()
     request.addEventListener('load', function (e) {
-        document.querySelector('#uploadProgress').style.display = 'none'
-
         if (request.status === 200) {
-            console.log(request.response);
-            //window.location = `/report/${request.response.report}`
+            window.location = `/report/${request.response.report}`
         } else {
-            document.querySelector('#errorMessage').innerText = 'Erro ao importar arquivo'
+            document.querySelector('#errorMessage').innerText = 'Upload Error'
             document.querySelector('#errorMessage').style.display = 'block'
         }
     })
-    request.upload.addEventListener('progress', function (e) {
-        document.querySelector('#uploadPercentage').innerText = (e.loaded / e.total) * 100
-        document.querySelector('#uploadProgress').style.display = 'block'
-    })
-    //request.responseType = 'json'
-    request.open('post', '/report/upload')
+
+    request.responseType = 'json'
+    request.open('post', '/upload')
     request.send(data)
 })

@@ -4,57 +4,59 @@
 namespace App\Controllers;
 
 
-use App\Services\Upload\UploadFile;
-use GuzzleHttp\Psr7\Response;
-use function GuzzleHttp\Psr7\str;
-use function GuzzleHttp\Psr7\stream_for;
+use App\Reader\Exceptions\EndOfFileException;
+use App\Reader\FileStream;
+use App\Reports\Exceptions\NullOrZeroSalesmanException;
+use App\Reports\SalesReport;
+use App\Services\Sales\BuildSalesModel;
+use Storage\FileManager;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
+/**
+ * Class ReportController
+ * @package App\Controllers
+ */
 class ReportController
 {
 
     /**
-     * @var UploadFile
+     * The method that will process the report
+     * It's a little bloated because I need to review the way that I can reach the report variable in fast route
+     * creation to inject into the DI container
+     * @param $report
+     * @param Environment $twig
+     * @return string
+     * @throws EndOfFileException
+     * @throws NullOrZeroSalesmanException
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
      */
-    private $uploadFile;
-
-    /**
-     * @var Response
-     */
-    private $response;
-
-    /**
-     * ReportController constructor.
-     * @param UploadFile $uploadFile
-     * @param Response $response
-     */
-    public function __construct(UploadFile $uploadFile, Response $response)
-    {
-        $this->uploadFile = $uploadFile;
-        $this->response = $response;
-    }
-
     public function show($report, Environment $twig): string
     {
-        return $twig->render('report.twig');
+
+        $file = __DIR__ . '/../../storage/in/' . $report . '.dat';
+        $output = __DIR__ . '/../../storage/out/';
+        $fileManager = new FileManager($file, $output);
+        $fileStream = new FileStream($fileManager);
+
+        // build the Report DTO
+        $buildSalesModel = new BuildSalesModel($fileStream);
+
+        //Move the file
+        $fileManager->moveFile();
+        $report = new SalesReport($buildSalesModel->make());
+
+        // build the report
+        $report->handle();
+
+        // renders the view
+        return $twig->render('report.twig',[
+            'report' => $report,
+        ]);
     }
 
-    /**
-     * Call the upload service and return the response
-     * @return string
-     */
-    public function upload(): string
-    {
-        $file = $this->uploadFile->handle();
-        //$this->response->withStatus(200, 'OK');
-        header('Content-Type: application/json');
-        $response = $this->response->withBody(stream_for(
-                json_encode([
-                        'report' => $file,
-                    ]
-                )
-            )
-        );
-        return str($response);
-    }
 }

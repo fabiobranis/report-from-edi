@@ -33,8 +33,17 @@ class FileTestContext extends TestCase
         parent::__construct($name, $data, $dataName);
         $this->filePath = __DIR__ . '/fixtures/test.dat';
         $this->storageFilePath = __DIR__ . '/../storage/in/test.dat';
+
+        if (!is_dir(dirname($this->storageFilePath))) {
+            mkdir(dirname($this->storageFilePath));
+        }
+
         copy($this->filePath, $this->storageFilePath );
         $this->outputFolder = __DIR__ . '/../storage/out/';
+
+        if (!is_dir($this->outputFolder)) {
+            mkdir($this->outputFolder);
+        }
     }
 
     /**

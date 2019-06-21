@@ -40,6 +40,13 @@ class FileManager
      */
     public function __construct(string $filePath, string $outputFolder)
     {
+
+        // make the directories if they doesn't exists
+        if (!is_dir(dirname($filePath))) {
+            mkdir(dirname($filePath));
+        }
+        self::makeDirectory(dirname($filePath));
+        self::makeDirectory($outputFolder);
         $this->filePath = $filePath;
         $this->outputFolder = $outputFolder;
         $this->fileName = basename($this->filePath, '.dat');
@@ -53,6 +60,17 @@ class FileManager
     public function __destruct()
     {
         $this->closeFile();
+    }
+
+    /**
+     * Static function to create folders if the does not exists
+     * @param $path
+     */
+    public static function makeDirectory($path): void
+    {
+        if (!is_dir($path)) {
+            mkdir($path);
+        }
     }
 
     /**

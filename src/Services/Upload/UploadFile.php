@@ -5,6 +5,7 @@ namespace App\Services\Upload;
 
 
 use Psr\Http\Message\ServerRequestInterface;
+use Storage\FileManager;
 
 /**
  * A simple class to wrap upload file functionality
@@ -49,6 +50,7 @@ class UploadFile
         foreach ($this->files as $uploadedFile) {
             /** @var $uploadedFile \GuzzleHttp\Psr7\UploadedFile */
             $movedFile = self::$uploadDir . $uploadedFile->getClientFilename();
+            FileManager::makeDirectory(dirname($movedFile));
             $uploadedFile->moveTo($movedFile);
         }
 

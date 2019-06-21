@@ -2,6 +2,7 @@
 
 use App\Controllers\HomeController;
 use App\Controllers\ReportController;
+use App\Controllers\UploadController;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -10,10 +11,8 @@ $container = require __DIR__ . '/app.php';
 
 $dispatcher = simpleDispatcher(function (RouteCollector $route) {
     $route->addRoute('GET', '/', HomeController::class);
-    $route->addGroup('/report', function (RouteCollector $routeCollector) {
-        $routeCollector->addRoute('GET', '/show/{report}', [ReportController::class, 'show']);
-        $routeCollector->addRoute('POST', '/upload', [ReportController::class, 'upload']);
-    });
+    $route->addRoute('POST', '/upload', [UploadController::class, 'upload']);
+    $route->addRoute('GET', '/report/{report}', [ReportController::class, 'show']);
 });
 
 $route = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
@@ -34,4 +33,5 @@ switch ($route[0]) {
         // We could do $container->get($controller) but $container->call()
         // does that automatically
         echo $container->call($controller, $parameters);
+        break;
 }
